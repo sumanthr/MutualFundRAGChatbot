@@ -1,0 +1,37 @@
+# Render Blueprint — https://render.com/docs/blueprint-spec
+# Connect this repo in Render → New → Blueprint → select repository.
+# Set GROQ_API_KEY in the dashboard (secret). After first deploy, run ingest on the shell
+# (see docs/deploymentPlan.md) or attach Chroma from GitHub Actions artifacts.
+#
+# Persistent disk: requires an instance type that supports disks (not all free tiers).
+# If disk creation fails, remove the `disk` block and set CHROMA_PATH to a local path
+# for testing only (data is lost on redeploy).
+
+services:
+  - type: web
+    name: mutual-fund-rag-api
+    runtime: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install --upgrade pip setuptools wheel && pip install .
+    startCommand: uvicorn mfr_phase4.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.6"
+      - key: CHROMA_PATH
+        value: /var/data/chroma_data
+      - key: THREAD_DB_PATH
+        value: /var/data/threads.sqlite3
+      - key: CHROMA_COLLECTION
+        value: mutual_fund_faq_groww_v1
+      - key: EMBEDDING_MODEL
+        value: BAAI/bge-small-en-v1.5
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
+      - key: GROQ_API_KEY
+        sync: false
+    disk:
+      name: mfr-rag-data
+      mountPath: /var/data
+      sizeGB: 1

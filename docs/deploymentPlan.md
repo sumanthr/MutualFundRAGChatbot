@@ -248,4 +248,12 @@ Alternatively, **SSH/shell on Render** and run `python -m mfr_phase1 --chroma-pa
 
 ---
 
-*Document version: 1.0 — aligns with repo layout `phase4/mfr_phase4` and `.github/workflows/ingest-scheduled.yml`.*
+##11. Files in this repository
+
+| File | Purpose |
+|------|---------|
+| [`render.yaml`](../render.yaml) | Render Blueprint: Python web service, env vars, persistent disk, health check |
+| [`phase4/mfr_phase4/static/vercel.json`](../phase4/mfr_phase4/static/vercel.json) | Vercel rewrites: proxy `/v1/*` and `/health` to your Render URL (replace placeholder) |
+| [`docs/deployRenderVercel.md`](./deployRenderVercel.md) | Step-by-step deploy runbook |
+
+*Document version: 1.1 — aligns with repo layout `phase4/mfr_phase4` and `.github/workflows/ingest-scheduled.yml`.*
