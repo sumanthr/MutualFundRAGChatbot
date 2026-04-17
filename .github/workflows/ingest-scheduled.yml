@@ -1,0 +1,79 @@
+# Full Phase 1 ingest: scrape → Groww SSR facts → chunk → embed → Chroma upsert.
+#
+# Schedule: 09:15 Asia/Kolkata (IST) = 03:45 UTC (GitHub Actions cron is UTC-only).
+# For 09:15 UTC instead, use: cron: "15 9 * * *"
+name: Scheduled ingest (scrape + chunk + embed + Chroma)
+
+on:
+  schedule:
+    - cron: "45 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache Hugging Face hub
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-${{ runner.os }}-bge-small-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            hf-${{ runner.os }}-bge-small-
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -e .
+
+      - name: Run ingest pipeline (all phases)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p logs
+          RUN_TS=$(date -u +%Y-%m-%dT%H%M%SZ)
+          LOG_FILE="logs/ingest-run-${RUN_TS}.log"
+          MAIN_LOG="logs/ingest-scheduler.log"
+          {
+            echo "========================================================================"
+            echo "GitHub Actions ingest — ${RUN_TS} UTC — run ${{ github.run_id }}"
+            echo "Pipeline: scrape → SSR facts → chunk → embed → Chroma"
+            echo "========================================================================"
+          } | tee -a "$LOG_FILE" | tee -a "$MAIN_LOG"
+          set +e
+          set -o pipefail
+          python -m mfr_phase1 \
+            --chroma-path chroma_data \
+            -v \
+            --summary-json ingest_summary.json \
+            2>&1 | tee -a "$LOG_FILE" | tee -a "$MAIN_LOG"
+          EXIT=${PIPESTATUS[0]}
+          set -e
+          exit "${EXIT}"
+
+      - name: Upload Chroma persist directory
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: chroma-index
+          path: chroma_data/
+
+      - name: Upload ingest summary (JSON)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingest-summary
+          path: ingest_summary.json
+
+      - name: Upload ingest logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ingest-logs
+          path: logs/

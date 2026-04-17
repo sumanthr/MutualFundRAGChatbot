@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Avoid native dark widgets on a light page if CSS fails; theme is set only in styles.css -->
+  <meta name="theme-color" content="#111827" />
+  <title>Mutual Fund FAQ — Facts-only</title>
+  <!-- Critical: prevents flash of wrong colors before stylesheet loads -->
+  <style>
+    html { background-color: #111827; color: #f3f4f6; }
+    body { background-color: #111827; color: #f3f4f6; margin: 0; }
+  </style>
+  <link rel="stylesheet" href="/static/styles.css?v=7" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Conversations">
+      <div class="sidebar-head">
+        <h2 class="sidebar-title">Conversations</h2>
+        <button type="button" id="new-thread" class="btn-new-chat">New chat</button>
+      </div>
+      <p class="sidebar-hint">Each chat keeps its own thread on the server. Switch anytime.</p>
+      <ul id="thread-list" class="thread-list" role="list"></ul>
+      <div class="sidebar-actions" role="group" aria-label="Manage conversations">
+        <button type="button" id="clear-other-chats" class="btn-sidebar-secondary" title="Remove every chat except the one you are in">
+          Clear other chats
+        </button>
+        <button type="button" id="clear-all-chats" class="btn-sidebar-danger" title="Remove all conversations from this device’s server">
+          Clear all chats
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-panel">
+      <header class="banner">
+        <h1>Mutual Fund FAQ Assistant</h1>
+        <p class="welcome">Ask factual questions about the indexed HDFC schemes (Groww pages). Answers are short and cite sources.</p>
+        <p class="disclaimer" role="note"><strong>Disclaimer:</strong> Facts-only. No investment advice.</p>
+      </header>
+
+      <main class="chat-main">
+        <div id="transcript-wrap" class="transcript-wrap" hidden>
+          <h2 class="transcript-heading">This conversation</h2>
+          <div id="transcript" class="transcript" aria-live="polite"></div>
+        </div>
+
+        <section class="examples" aria-label="Example questions">
+          <p class="examples-label">Try an example</p>
+          <div class="example-btns">
+            <button type="button" class="example" data-q="What is the expense ratio for HDFC Large Cap Fund Direct Growth?">Expense ratio — HDFC Large Cap</button>
+            <button type="button" class="example" data-q="What is the minimum SIP for HDFC ELSS Tax Saver Fund Direct Plan Growth?">Minimum SIP — HDFC ELSS</button>
+            <button type="button" class="example" data-q="What is the exit load for HDFC Mid Cap Fund Direct Growth?">Exit load — HDFC Mid Cap</button>
+          </div>
+        </section>
+
+        <form id="chat-form" class="chat-form">
+          <label for="q">Your question</label>
+          <textarea id="q" name="q" rows="3" required placeholder="e.g. What is the benchmark for HDFC Focused Fund Direct Growth?"></textarea>
+          <div class="row">
+            <button type="submit" id="send">Ask</button>
+          </div>
+        </form>
+
+        <p id="err" class="error" role="alert" hidden></p>
+      </main>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=7"></script>
+</body>
+</html>

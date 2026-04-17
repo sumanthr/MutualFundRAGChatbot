@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mutual-fund-rag"
+version = "0.1.0"
+description = "Facts-only mutual fund RAG (phased implementation)"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+  "httpx>=0.27.0",
+  "beautifulsoup4>=4.12.0",
+  "lxml>=5.0.0",
+  "numpy>=1.24.0,<2",
+  "chromadb>=0.5.0",
+  "sentence-transformers>=3.0.0",
+  "python-dotenv>=1.0.0",
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0"]
+phase5 = ["rank-bm25>=0.2.2"]
+
+[tool.setuptools.packages.find]
+where = ["phase1", "phase2", "phase3", "phase4", "phase5"]
+
+[tool.setuptools.package-data]
+mfr_phase5 = ["cases.json"]
