@@ -248,7 +248,7 @@ Alternatively, **SSH/shell on Render** and run `python -m mfr_phase1 --chroma-pa
 
 ---
 
-##11. Files in this repository
+## 11. Files in this repository
 
 | File | Purpose |
 |------|---------|
