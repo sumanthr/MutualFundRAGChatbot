@@ -34,14 +34,16 @@ def retrieve(
 
     client = chromadb.PersistentClient(path=str(chroma_path))
     coll = client.get_collection(name=collection_name)
-    where: dict[str, Any] | None = None
+    # Avoid Chroma `where` on vector query: some persisted stores raise
+    # InternalError("Error finding id") on filtered queries while unfiltered works.
+    # Narrow by scheme_slug in-process after over-fetching neighbors.
+    n_results = top_k
     if scheme_slug:
-        where = {"scheme_slug": scheme_slug}
+        n_results = min(500, max(top_k * 50, top_k + 24))
 
     res = coll.query(
         query_embeddings=q_emb,
-        n_results=top_k,
-        where=where,
+        n_results=n_results,
         include=["documents", "metadatas", "distances"],
     )
 
@@ -57,10 +59,13 @@ def retrieve(
         dist = float(row_dists[i]) if i < len(row_dists) and row_dists[i] is not None else None
         out.append(RetrievedChunk(document=text or "", metadata=meta, distance=dist))
 
+    if scheme_slug:
+        out = [c for c in out if c.metadata.get("scheme_slug") == scheme_slug]
+
     lim = max_distance if max_distance is not None else phase2_settings.RETRIEVAL_MAX_DISTANCE
     if lim > 0:
         out = [c for c in out if c.distance is not None and c.distance <= lim]
-    return out
+    return out[:top_k]
 
 
 def allowed_citation_urls(chunks: list[RetrievedChunk]) -> set[str]:

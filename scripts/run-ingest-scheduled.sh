@@ -56,11 +56,16 @@ banner "========================================================================
 
 set +e
 set -o pipefail
-"$PYTHON" -m mfr_phase1 \
-  --chroma-path "$CHROMA_PATH" \
-  -v \
-  --summary-json "$SUMMARY_JSON" \
-  "${EXTRA[@]}" 2>&1 | tee -a "$RUN_LOG" | tee -a "$MAIN_LOG"
+CMD=(
+  "$PYTHON" -m mfr_phase1
+  --chroma-path "$CHROMA_PATH"
+  -v
+  --summary-json "$SUMMARY_JSON"
+)
+if [[ "${#EXTRA[@]}" -gt 0 ]]; then
+  CMD+=("${EXTRA[@]}")
+fi
+"${CMD[@]}" 2>&1 | tee -a "$RUN_LOG" | tee -a "$MAIN_LOG"
 EXIT="${PIPESTATUS[0]}"
 set -e
 

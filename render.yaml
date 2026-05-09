@@ -1,11 +1,14 @@
 # Render Blueprint — https://render.com/docs/blueprint-spec
-# Connect this repo in Render → New → Blueprint → select repository.
-# Set GROQ_API_KEY in the dashboard (secret). After first deploy, run ingest on the shell
-# (see docs/deploymentPlan.md) or attach Chroma from GitHub Actions artifacts.
 #
-# Persistent disk: requires an instance type that supports disks (not all free tiers).
-# If disk creation fails, remove the `disk` block and set CHROMA_PATH to a local path
-# for testing only (data is lost on redeploy).
+# Setup: Render → New → Blueprint → connect GitHub repo → create resources.
+# In the dashboard, set secret GROQ_API_KEY when prompted (sync: false below).
+#
+# After first deploy, open the service Shell and run Phase 1 ingest once so Chroma
+# exists on the persistent disk (see docs/deployRenderVercel.md).
+#
+# Persistent disk requires a paid instance type on Render (e.g. Starter). If you
+# use Free tier, remove the `disk` block and expect ephemeral storage (Chroma lost
+# on redeploy; OK for experiments only).
 
 services:
   - type: web
@@ -29,9 +32,19 @@ services:
         value: BAAI/bge-small-en-v1.5
       - key: GROQ_MODEL
         value: llama-3.1-8b-instant
+      # Cosine distance cutoff; slightly above default helps short queries on the small corpus.
+      - key: RETRIEVAL_MAX_DISTANCE
+        value: "0.38"
+      # Keep embedding model weights on the disk so restarts do not re-download.
+      - key: HF_HOME
+        value: /var/data/huggingface
+      - key: TRANSFORMERS_CACHE
+        value: /var/data/huggingface
+      - key: SENTENCE_TRANSFORMERS_HOME
+        value: /var/data/huggingface
       - key: GROQ_API_KEY
         sync: false
     disk:
       name: mfr-rag-data
       mountPath: /var/data
-      sizeGB: 1
+      sizeGB: 2

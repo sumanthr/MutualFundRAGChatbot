@@ -75,6 +75,13 @@ This runs the **scraping service** (fetch allowlisted Groww URLs), then chunks, 
 
 A workflow runs **daily at 09:15 UTC** (see workflow file for **IST** option), executes the same pipeline, and uploads the `chroma_data` directory as an artifact. See `docs/ragArchitecture.md` §2.3.
 
+## Deploy (Render + Vercel)
+
+- **Backend:** `render.yaml` Blueprint → FastAPI on Render (`uvicorn mfr_phase4.app:app`), persistent disk for Chroma + SQLite.
+- **Frontend:** Vercel project with **root directory** `phase4/mfr_phase4/static`; `vercel.json` rewrites `/v1/*` and `/health` to your Render URL.
+
+Full checklist: **[docs/deployRenderVercel.md](docs/deployRenderVercel.md)**.
+
 ## Compliance
 
 Facts-only; no investment advice. v1 corpus: five Groww scheme pages (HTML). See `docs/problemStatement.md`.
