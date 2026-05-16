@@ -14,6 +14,7 @@ from mfr_phase4.schemas import (
     ChatRespondRequest,
     ChatRespondResponse,
     HealthResponse,
+    ReadyResponse,
     ThreadCreateResponse,
     ThreadListResponse,
     ThreadMessagesResponse,
@@ -59,6 +60,40 @@ _store = ThreadStore(THREAD_DB_PATH)
 @app.get("/health", response_model=HealthResponse)
 def health() -> HealthResponse:
     return HealthResponse(status="ok")
+
+
+@app.get("/ready", response_model=ReadyResponse)
+def ready() -> ReadyResponse:
+    """True when Chroma has indexed chunks (Render has no Shell on Free tier)."""
+    from mfr_phase2.settings import CHROMA_COLLECTION, CHROMA_PATH
+
+    path = CHROMA_PATH
+    if not path.is_dir():
+        return ReadyResponse(
+            ready=False,
+            chroma_path=str(path),
+            chroma_count=0,
+            detail="chroma directory missing — set CHROMA_PATH=./deploy/chroma_data and redeploy",
+        )
+    try:
+        import chromadb
+
+        client = chromadb.PersistentClient(path=str(path))
+        coll = client.get_collection(CHROMA_COLLECTION)
+        n = int(coll.count())
+    except Exception as e:
+        return ReadyResponse(
+            ready=False,
+            chroma_path=str(path),
+            chroma_count=0,
+            detail=str(e),
+        )
+    return ReadyResponse(
+        ready=n > 0,
+        chroma_path=str(path),
+        chroma_count=n,
+        detail="ok" if n > 0 else "collection empty",
+    )
 
 
 @app.post("/v1/chat/threads", response_model=ThreadCreateResponse)

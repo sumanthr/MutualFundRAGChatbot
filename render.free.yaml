@@ -19,7 +19,7 @@ services:
       - key: PYTHON_VERSION
         value: "3.11.6"
       - key: CHROMA_PATH
-        value: ./chroma_data
+        value: ./deploy/chroma_data
       - key: THREAD_DB_PATH
         value: ./data/threads.sqlite3
       - key: CHROMA_COLLECTION

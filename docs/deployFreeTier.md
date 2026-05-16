@@ -53,7 +53,7 @@ Do **not** use the paid `render.yaml` Blueprint as-is (it requests **Starter** +
    |-----|--------|
    | `PYTHON_VERSION` | `3.11.6` |
    | `GROQ_API_KEY` | *(your Groq secret)* |
-   | `CHROMA_PATH` | `./chroma_data` |
+   | `CHROMA_PATH` | `./deploy/chroma_data` |
    | `THREAD_DB_PATH` | `./data/threads.sqlite3` |
    | `CHROMA_COLLECTION` | `mutual_fund_faq_groww_v1` |
    | `EMBEDDING_MODEL` | `BAAI/bge-small-en-v1.5` |
@@ -84,20 +84,21 @@ Expected: `{"status":"ok"}`.
 
 If you get an error, wait for the deploy to finish or check **Logs** in Render.
 
-### B4. Build the search index (required once per deploy)
+### B4. Search index (no Shell on Free)
 
-The API needs Chroma data. On Free tier this is **not** kept across redeploys.
+**Render Shell is paid** — use the **committed index** in `deploy/chroma_data/` (included in the repo). The build script also warms the embedding model cache.
 
-1. In Render → your service → **Shell** (tab).
-2. Run:
+1. On Render → **Environment**, set **`CHROMA_PATH`** = `./deploy/chroma_data` (not `./chroma_data`).
+2. Redeploy with **Clear build cache** so `bash scripts/render-build.sh` runs (uses `deploy/chroma_data` + model warmup).
+3. Open **`https://<render-host>/ready`** — expect `"ready": true` and `"chroma_count" > 0`.
 
-   ```bash
-   mkdir -p chroma_data data .cache/huggingface
-   python -m mfr_phase1 --chroma-path ./chroma_data
-   ```
+To refresh the index locally later:
 
-3. Wait until it finishes (first run downloads the embedding model — can take **5–15+ minutes** on Free).
-4. If it fails with **out of memory**, wait a minute and run the same command again, or redeploy and retry when the instance is idle.
+```bash
+python -m mfr_phase1 --chroma-path ./chroma_data
+./scripts/export-deploy-chroma.sh
+git add deploy/chroma_data && git commit -m "Refresh deploy chroma" && git push
+```
 
 ### B5. Test the API
 
@@ -121,7 +122,23 @@ You should get JSON with `"response_type":"factual"` (or `"refusal"` if ingest d
 
 ## Part C — Frontend on Vercel (Hobby / free)
 
-### C1. Point `vercel.json` at Render
+### C1. Point the UI at Render (fixes 502 timeouts)
+
+Vercel rewrites can **time out** (~60s) while Render Free wakes up and loads the embedding model → **502**.
+
+**Recommended:** call Render **directly** from the browser (CORS is already enabled).
+
+1. Edit `phase4/mfr_phase4/static/config.js`:
+
+   ```javascript
+   window.MFR_API_BASE = "https://<your-render-host>.onrender.com";
+   ```
+
+   (no trailing slash)
+
+2. Still update `vercel.json` rewrites if you want `/health` on the Vercel domain, or rely on `config.js` only for API calls.
+
+### C1b. Point `vercel.json` at Render (optional)
 
 On your machine (or in GitHub’s web editor):
 
@@ -188,7 +205,9 @@ If you see **502** or **timeout**, wake the Render API first by opening `/health
 |---------|------------|
 | Chat always refuses / empty answers | Re-run **B4** ingest in Render Shell. |
 | 500 after redeploy | Data was wiped — run ingest again (**B4**). |
-| Very slow first message | Normal — Render Free was asleep; hit `/health` first. |
+| Very slow first message | Normal — Render Free was asleep; hit `/health` then `/ready` first. |
+| **502** from Vercel | Set `window.MFR_API_BASE` in `config.js` to your Render URL (see C1). |
+| `/ready` shows `ready: false` | Wrong `CHROMA_PATH` or old deploy — use `./deploy/chroma_data` and redeploy. |
 | Ingest OOM in Shell | Retry; or build `chroma_data` locally and use GitHub Actions artifact (advanced). |
 | Vercel chat 404 on `/v1/...` | Wrong **Root Directory** or `vercel.json` hostname typo. |
 

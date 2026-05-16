@@ -1,11 +1,12 @@
 (function () {
   const STORAGE_KEY = "mfr_thread_id";
   const API_BASE =
-    typeof window !== "undefined" &&
-    window.location &&
-    window.location.protocol === "file:"
+    (typeof window !== "undefined" && window.MFR_API_BASE) ||
+    (typeof window !== "undefined" &&
+      window.location &&
+      window.location.protocol === "file:"
       ? "http://127.0.0.1:8000"
-      : "";
+      : "");
 
   const fetchOpts = { cache: "no-store" };
 

@@ -66,3 +66,10 @@ class ThreadsPurgeResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     status: str
+
+
+class ReadyResponse(BaseModel):
+    ready: bool
+    chroma_path: str
+    chroma_count: int
+    detail: str = ""
