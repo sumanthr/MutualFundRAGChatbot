@@ -28,4 +28,5 @@ phase5 = ["rank-bm25>=0.2.2"]
 where = ["phase1", "phase2", "phase3", "phase4", "phase5"]
 
 [tool.setuptools.package-data]
+mfr_phase4 = ["static/*"]
 mfr_phase5 = ["cases.json"]

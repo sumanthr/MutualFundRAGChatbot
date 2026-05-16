@@ -128,4 +128,5 @@ def index() -> FileResponse:
     return FileResponse(index_path)
 
 
-app.mount("/static", StaticFiles(directory=str(_static)), name="static")
+if _static.is_dir():
+    app.mount("/static", StaticFiles(directory=str(_static)), name="static")
