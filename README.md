@@ -80,7 +80,8 @@ A workflow runs **daily at 09:15 UTC** (see workflow file for **IST** option), e
 - **Backend:** `render.yaml` Blueprint → FastAPI on Render (`uvicorn mfr_phase4.app:app`), persistent disk for Chroma + SQLite.
 - **Frontend:** Vercel project with **root directory** `phase4/mfr_phase4/static`; `vercel.json` rewrites `/v1/*` and `/health` to your Render URL.
 
-Full checklist: **[docs/deployRenderVercel.md](docs/deployRenderVercel.md)**.
+- **Free tier (Render Free + Vercel Hobby):** **[docs/deployFreeTier.md](docs/deployFreeTier.md)**
+- **Paid Render (disk):** **[docs/deployRenderVercel.md](docs/deployRenderVercel.md)**
 
 ## Compliance
 
