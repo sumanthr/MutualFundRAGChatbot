@@ -43,7 +43,7 @@ Do **not** use the paid `render.yaml` Blueprint as-is (it requests **Starter** +
    | **Branch** | `main` |
    | **Root Directory** | *(leave empty)* |
    | **Runtime** | **Python 3** |
-   | **Build Command** | `pip install --upgrade pip setuptools wheel && pip install .` |
+   | **Build Command** | `bash scripts/render-build.sh` |
    | **Start Command** | `uvicorn mfr_phase4.app:app --host 0.0.0.0 --port $PORT` |
    | **Instance Type** | **Free** |
 

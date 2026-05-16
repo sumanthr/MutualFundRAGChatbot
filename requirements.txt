@@ -1,0 +1,11 @@
+# Production deps (keep in sync with pyproject.toml [project.dependencies]).
+# Render runs this via scripts/render-build.sh if the dashboard build command is empty.
+httpx>=0.27.0
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+numpy>=1.24.0,<2
+chromadb>=0.5.0
+sentence-transformers>=3.0.0
+python-dotenv>=1.0.0
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0

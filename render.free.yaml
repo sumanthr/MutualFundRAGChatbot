@@ -12,7 +12,7 @@ services:
     runtime: python
     region: oregon
     plan: free
-    buildCommand: pip install --upgrade pip setuptools wheel && pip install .
+    buildCommand: bash scripts/render-build.sh
     startCommand: uvicorn mfr_phase4.app:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:

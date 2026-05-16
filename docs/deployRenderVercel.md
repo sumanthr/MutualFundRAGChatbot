@@ -57,7 +57,7 @@ If you do not use a Blueprint:
 | Setting | Value |
 |--------|--------|
 | Runtime | Python 3.11 |
-| Build command | `pip install --upgrade pip setuptools wheel && pip install .` |
+| Build command | `bash scripts/render-build.sh` |
 | Start command | `uvicorn mfr_phase4.app:app --host 0.0.0.0 --port $PORT` |
 | Health check path | `/health` |
 
